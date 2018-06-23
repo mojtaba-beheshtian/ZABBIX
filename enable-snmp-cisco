@@ -1,0 +1,8 @@
+####################################
+enable snmp on cisco devices
+####################################
+
+    Router(config)#snmp-server community #password RO (read-only)
+
+    Router#show run | section snmp
+    Router#show run | include snmp

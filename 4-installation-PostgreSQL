@@ -1,0 +1,154 @@
+##############################################################################
+installation with PostgreSQL database on zabbix-server or zabbix-proxy
+##############################################################################
+
+################################################
+Red Hat Enterprise Linux / CentOS
+################################################
+
+################################################
+Installing packages
+################################################
+Here is an example for postgreSQL.
+
+    # yum install postgresql postgresql-contrib
+
+################################################
+Creating initial database
+################################################
+You need to have a database user with permissions to create database objects. The following shell command will create a user zabbix. Specify a password when prompted and repeat the password (note, you may first be asked for a sudo password):
+
+    shell> sudo -u postgres createuser --pwprompt zabbix
+
+Now we will set up the database zabbix (last parameter) with the previously created user as the owner (-O zabbix) and import initial schema and data:
+
+    shell> sudo -u postgres createdb -O zabbix zabbix
+    shell> zcat /usr/share/doc/zabbix-server-pgsql/create.sql.gz | sudo -u zabbix psql zabbix
+
+The above commands are provided as an example that will work in most GNU/Linux installations. You can use different commands, e. g. psql -U <username> depending on how your system/database is configured. If you have troubles setting up the database please consult your database administrator.
+
+################################################
+Database configuration for Zabbix server
+################################################
+Edit server host, name, user and password in zabbix_server.conf as follows, replacing <username_password> with actual password of PostgreSQL user:
+
+    # vi /etc/zabbix/zabbix_server.conf
+    DBHost=
+    DBName=zabbix
+    DBUser=zabbix
+    DBPassword=<username_password>
+
+You might want to keep default setting DBHost=localhost (or an IP address), but this would make PostgreSQL use network socket connecting to Zabbix. See SELinux configuration block below for instructions.
+
+################################################
+Starting Zabbix server process
+################################################
+It's time to start Zabbix server process and make it start at system boot:
+
+    # systemctl start zabbix-server
+    # systemctl enable zabbix-server
+
+################################################
+PHP configuration for Zabbix frontend
+################################################
+Apache configuration file for Zabbix frontend is located in /etc/httpd/conf.d/zabbix.conf. Some PHP settings are already configured. But it's necessary to uncomment the “date.timezone” setting and set the right timezone for you.
+
+    php_value max_execution_time 300    
+    php_value memory_limit 128M
+    php_value post_max_size 16M
+    php_value upload_max_filesize 2M
+    php_value max_input_time 300
+    php_value always_populate_raw_post_data -1
+    php_value date.timezone Asia/Tehran
+
+################################################
+SELinux configuration
+################################################
+Having SELinux status enabled in enforcing mode, you need to execute the following command to enable successful connection of Zabbix frontend to the server:
+
+    # setsebool -P httpd_can_connect_zabbix on
+
+If any parameter such as “localhost” or an IP address is set for DBHost= in zabbix_server.conf, you need to allow connection between Zabbix frontend and the database too:
+
+    # setsebool -P httpd_can_network_connect_db on
+
+As frontend and SELinux configuration is done, you need to restart Apache web server:
+
+    # systemctl start httpd
+
+################################################
+Installing frontend
+################################################
+Now you are ready to proceed with frontend installation steps which will allow you to access your newly installed Zabbix.
+
+Zabbix official repository provides fping, iksemel, libssh2 packages for RHEL as well. These packages are located in the non-supported directory.
+
+################################################
+Debian / Ubuntu
+################################################
+
+################################################
+Installing packages
+################################################
+Example for postgreSQL
+
+    # apt-get install postgresql postgresql-contrib
+
+
+################################################
+Creating initial database
+################################################
+You need to have database username user set up with permissions to create database objects.
+Create Zabbix database on PostgreSQL with the following commands:
+    
+    shell> su - postgres
+    shell>createuser -s zabbix
+    shell>createdb zabbix
+    shell> psql -U zabbix -d zabbix 
+    psql> \q 
+
+Then import initial schema and data:
+
+    # zcat /usr/share/doc/zabbix-server-pgsql/create.sql.gz | psql -U <username> zabbix
+
+################################################
+Database configuration for Zabbix server
+################################################
+Edit server host, name, user and password in zabbix_server.conf as follows, replacing <username_password> with actual password of PostgreSQL user:
+
+    # vi /etc/zabbix/zabbix_server.conf
+    DBHost=
+    DBName=zabbix
+    DBUser=zabbix
+    DBPassword=<username_password>
+
+You might want to keep default setting DBHost=localhost (or an IP address), but this would make PostgreSQL use network socket instead of UNIX socket connecting to Zabbix. If you also have SELinux enabled in enforcing mode see SELinux configuration for instructions.
+
+################################################
+Starting Zabbix server process
+################################################
+Now you may start Zabbix server process and make it start at system boot
+
+    # service zabbix-server start
+    # update-rc.d zabbix-server enable
+
+################################################
+PHP configuration for Zabbix frontend
+################################################
+Apache configuration file for Zabbix frontend is located in /etc/zabbix/apache.conf. Some PHP settings are already configured. But it's necessary to uncomment the “date.timezone” setting and set the right timezone for you.
+
+    php_value max_execution_time 300
+    php_value memory_limit 128M
+    php_value post_max_size 16M
+    php_value upload_max_filesize 2M
+    php_value max_input_time 300
+    php_value always_populate_raw_post_data -1
+    php_value date.timezone Asia/Tehran
+
+As frontend is configured, you need to restart Apache web server:
+
+    # service apache2 restart
+
+Installing frontend
+
+Now you are ready to proceed with frontend installation steps which will allow you to access your newly installed Zabbix.

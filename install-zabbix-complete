@@ -1,0 +1,136 @@
+#############################################
+Getting Zabbix
+#############################################
+required
+    1-install snmp
+    2-install Open SSH Server
+    3-Install Mail Server    
+    4-install repository
+    5-install zabbix-server-pgsql zabbix-agent zabbix-frontend-php
+    6-install posgreSQL
+    7-config postgreSQL 
+    8-configuration Zabbix server
+    9-PHP configuration for Zabbix frontend
+    10-install another requiments
+    11-Start Zabbix server process.
+
+##############################################
+1-install snmp
+##############################################
+    sudo apt-get install libsnmp-mib-compiler-perl 
+    sudo apt-get install snmp-mibs-downloader 
+    sudo apt-get install libsnmp-base 
+    sudo apt-get install libsnmp-dev 
+    sudo apt-get install snmp
+    sudo apt-get install snmpd
+
+###############################################
+2-install Open SSH Server    
+###############################################
+    sudo apt-get install openssh-server
+    sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.original
+    sudo chmod a-w /etc/ssh/sshd_config.origina
+
+###############################################
+3-Install Mail Server
+###############################################
+    sudo apt-get -y install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
+    sudo dpkg-reconfigure postfix
+
+###############################################
+4-install repository    
+###############################################
+Install the repository configuration package from http://repo.zabbix.com/, which contains apt (software package manager) configuration files. Shell commands for Debian 9 (stretch):
+
+    # wget http://repo.zabbix.com/zabbix/3.4/debian/pool/main/z/zabbix-release/zabbix-release_3.4-1+stretch_all.deb
+    # dpkg -i zabbix-release_3.4-1+stretch_all.deb
+    # apt-get update
+
+For Debian 8 change 'stretch' to 'jessie'. For Debian 7 change 'stretch' to 'wheezy'.
+
+Now you are ready to install Zabbix server with MySQL or server with PostreSQL, agent and proxy.
+
+###############################################
+5-install zabbix-server-pgsql zabbix-agent zabbix-frontend-php
+###############################################
+To install agent after correct repository configuration package is installed, run the following command:
+
+    # apt-get install zabbix-server-pgsql zabbix-frontend-php
+
+###############################################
+6-install posgreSQL    
+###############################################
+    # apt-get install postgresql postgresql-contrib
+
+###############################################
+7-config postgreSQL    
+###############################################
+    shell> su - postgres
+    shell>createuser -s zabbix
+    shell>createdb zabbix
+
+vim /etc/posgresql/9.6/main/pg_hba.conf
+    local   zabbix  zabbix  trust
+
+    shell> psql -U zabbix -d zabbix
+    shell>\password zabbix  #set password for zabbix user 
+    psql> \q 
+
+Then import initial schema and data:
+
+    # zcat /usr/share/doc/zabbix-server-pgsql/create.sql.gz | psql -U <username> zabbix
+    systemctl restart postgresql
+
+################################################
+8-configuration Zabbix server
+################################################
+Edit server host, name, user and password in zabbix_server.conf as follows, replacing <username_password> with actual password of PostgreSQL user:
+
+    # vi /etc/zabbix/zabbix_server.conf
+    DBHost=localhost
+    DBName=zabbix
+    DBUser=zabbix
+    DBPassword=<username_password>
+
+You might want to keep default setting DBHost=localhost (or an IP address), but this would make PostgreSQL use network socket instead of UNIX socket connecting to Zabbix. If you also have SELinux enabled in enforcing mode see SELinux configuration for instructions.
+
+    ./configure --enable-server --with-postgresql --with-net-snmp
+   
+################################################
+9-PHP configuration for Zabbix frontend
+################################################
+Apache configuration file for Zabbix frontend is located in /etc/httpd/conf.d/zabbix.conf. Some PHP settings are already configured. But it's necessary to uncomment the “date.timezone” setting and set the right timezone for you.
+
+    php_value max_execution_time 300    
+    php_value memory_limit 128M
+    php_value post_max_size 16M
+    php_value upload_max_filesize 2M
+    php_value max_input_time 300
+    php_value always_populate_raw_post_data -1
+    php_value date.timezone Asia/Tehran
+
+It's necessary to uncomment the “date.timezone” setting and set the correct timezone for you. After changing the configuration file restart the apache web server.
+
+    # service apache2 restart
+
+################################################
+10-install another requirements
+################################################
+    apt install php-mbstring php-pgsql php-xml php-pear php7.0-dev php-bcmath php5-gd php7.0-gd php-ldap
+    pecl install oci8-2.0.8
+
+################################################
+11-Start Zabbix server process.
+################################################
+    # service zabbix-server start
+    # systemctl start zabbix-server
+    # systemctl enable zabbix-server
+    # service apache2 restart
+
+#################################################
+default web user & pass
+#################################################
+for first login you can login to web with:
+
+    Default Username is Admin
+    Default Password is zabbix

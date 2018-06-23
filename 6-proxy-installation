@@ -1,0 +1,104 @@
+################################################ 
+Proxy installation
+################################################
+For this procedure Zabbix repository provides choice of 3 packages named as follows:
+
+    zabbix-proxy-mysql
+    zabbix-proxy-pgsql
+    zabbix-proxy-sqlite3
+
+where the last value of the name (after zabbix-proxy-) represents database type of the package — MySQL, PostgreSQL and SQLite respectively.
+
+################################################
+Red Hat Enterprise Linux / CentOS
+################################################
+
+################################################
+Installing packages
+################################################
+Install proxy and make sure to insert correct database type value for <database_type>:
+
+    # yum install zabbix-proxy-<database_type>
+
+################################################
+Creating proxy database
+################################################
+Create Zabbix proxy database and its user. 
+For instructions on doing that, see examples from server installation with MySQL or PostgreSQL and mind peculiarity of the SQLite creation.
+
+Then import initial schema. Make sure to insert correct version for 3.2.X.
+
+MySQL command:
+
+    # zcat /usr/share/doc/zabbix-proxy-mysql-3.2.X/schema.sql.gz | mysql -u<username> zabbix
+
+PostgreSQL command:
+
+    # zcat /usr/share/doc/zabbix-proxy-pgsql-3.2.X/schema.sql.gz | psql -U <username> zabbix
+
+SQLite command:
+
+    # zcat /usr/share/doc/zabbix-proxy-sqlite3-3.2.X/schema.sql.gz | sqlite3 zabbix.db
+
+In order to check the version you have in your package, use the following command:
+
+    # rpm -q zabbix-proxy-<database_type>
+
+################################################
+Starting Zabbix proxy process
+################################################
+After database is installed and zabbix_proxy.conf file is configured, you may start Zabbix proxy process.
+
+    # systemctl start zabbix-proxy
+
+################################################
+Debian / Ubuntu
+################################################
+
+################################################
+Installing packages
+################################################
+Install proxy and make sure to insert correct database type value for <database_type>:
+
+    # apt-get install zabbix-proxy-<database_type>
+
+################################################
+Creating proxy database
+################################################
+Create Zabbix proxy database and its user. 
+For instructions on doing that, see examples from server installation with MySQL or PostgreSQL and mind peculiarity of the SQLite creation.
+
+Then import initial schema.
+
+MySQL command:
+
+    # zcat /usr/share/doc/zabbix-proxy-mysql/schema.sql.gz | mysql -u<username> zabbix
+
+PostgreSQL command:
+
+    # zcat /usr/share/doc/zabbix-proxy-pgsql/schema.sql.gz | psql -U <username> zabbix
+
+SQLite command:
+
+    # zcat /usr/share/doc/zabbix-proxy-sqlite3/schema.sql.gz | sqlite3 zabbix.db
+
+################################################
+Starting Zabbix proxy process
+################################################
+After database is installed and zabbix_proxy.conf file is configured, you may start Zabbix proxy process.
+
+    # service zabbix-proxy start
+
+Common configuration
+
+Database configuration for Zabbix proxy
+
+Edit proxy host, name, user and password in zabbix_proxy.conf
+
+If Zabbix proxy and Zabbix server are installed on the same host, their databases must have unique names! Defaults for both are zabbix.
+    
+    # vi /etc/zabbix/zabbix_proxy.conf
+    DBHost=localhost
+    DBName=zabbix
+    DBUser=zabbix
+    DBPassword=zabbix

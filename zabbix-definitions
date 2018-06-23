@@ -1,0 +1,90 @@
+###################################
+ Zabbix definitions
+###################################
+Overview
+
+    In this section you can learn the meaning of some terms commonly used in Zabbix.
+
+Definitions
+
+1-host
+
+    - a networked device that you want to monitor, with IP/DNS.
+
+2-host group
+
+    - a logical grouping of hosts; it may contain hosts and templates. Hosts and templates within a host group are not in any way linked to each other. Host groups are used when assigning access rights to hosts for different user groups.
+
+3-item
+
+    - a particular piece of data that you want to receive off of a host, a metric of data.
+
+4-trigger
+
+    - a logical expression that defines a problem threshold and is used to “evaluate” data received in items
+
+When received data are above the threshold, triggers go from 'Ok' into a 'Problem' state. When received data are below the threshold, triggers stay in/return to an 'Ok' state.
+
+5-event
+
+    - a single occurrence of something that deserves attention such as a trigger changing state or a discovery/agent auto-registration taking place
+
+6-problem
+
+    - a trigger that is in “Problem” state
+
+7-action
+
+    - a predefined means of reacting to an event.
+
+An action consists of operations (e.g. sending a notification) and conditions (when the operation is carried out)
+
+8-escalation
+
+    - a custom scenario for executing operations within an action; a sequence of sending notifications/executing remote commands
+
+9-media
+
+    - a means of delivering notifications; delivery channel
+
+10-notification
+
+    - a message about some event sent to a user via the chosen media channel
+
+11-remote command
+
+    - a pre-defined command that is automatically executed on a monitored host upon some condition
+
+12-template
+
+    - a set of entities (items, triggers, graphs, screens, applications, low-level discovery rules, web scenarios) ready to be applied to one or several hosts
+
+The job of templates is to speed up the deployment of monitoring tasks on a host; also to make it easier to apply mass changes to monitoring tasks. Templates are linked directly to individual hosts.
+
+13-application
+
+    - a grouping of items in a logical group
+
+14-web scenario
+
+    - one or several HTTP requests to check the availability of a web site
+
+15-frontend
+
+    - the web interface provided with Zabbix
+
+16-Zabbix API
+
+    - Zabbix API allows you to use the JSON RPC protocol to create, update and fetch Zabbix objects (like hosts, items, graphs and others) or perform any other custom tasks
+
+17-Zabbix server
+
+    - a central process of Zabbix software that performs monitoring, interacts with Zabbix proxies and agents, calculates triggers, sends notifications; a central repository of data
+
+18-Zabbix agent
+
+    - a process deployed on monitoring targets to actively monitor local resources and applications
+
+19-Zabbix proxy
+    
+    - a process that may collect data on behalf of Zabbix server, taking some processing load off of the server

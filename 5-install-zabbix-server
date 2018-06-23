@@ -1,0 +1,50 @@
+################################################
+Agent installation
+################################################
+This page covers installation of Zabbix agent. If needed, you may check additional info about supported platforms and permission requirements for the agent.
+
+################################################
+Red Hat Enterprise Linux / CentOS
+################################################
+To install agent after correct repository configuration package is installed, run the following command:
+
+    # yum install zabbix-server-pgsql zabbix-frontend-php
+
+Now agent is ready to be started by:
+
+    # systemctl start zabbix-server
+    # systemctl enable zabbix-server
+
+################################################
+Debian / Ubuntu
+################################################
+To install agent after correct repository configuration package is installed, run the following command:
+
+    # apt-get install zabbix-server-pgsql zabbix-frontend-php
+
+Now agent is ready to be started by:
+
+    # service zabbix-server start
+    # systemctl start zabbix-server
+    # systemctl enable zabbix-server
+
+################################################
+Windows
+################################################
+Check this appendix section for Windows-based installation and configuration instructions.
+
+################################################
+Database configuration for Zabbix server
+################################################
+Edit server host, name, user and password in zabbix_server.conf as follows, replacing <username_password> with actual password of PostgreSQL user:
+
+    # vi /etc/zabbix/zabbix_server.conf
+    DBHost=
+    DBName=zabbix
+    DBUser=zabbix
+    DBPassword=<username_password>
+
+You might want to keep default setting DBHost=localhost (or an IP address), but this would make PostgreSQL use network socket connecting to Zabbix. See SELinux configuration block below for instructions.
+
+        # systemctl start zabbix-server
+        # systemctl enable zabbix-server
