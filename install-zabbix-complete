@@ -99,7 +99,7 @@ You might want to keep default setting DBHost=localhost (or an IP address), but 
 ################################################
 9-PHP configuration for Zabbix frontend
 ################################################
-Apache configuration file for Zabbix frontend is located in /etc/httpd/conf.d/zabbix.conf. Some PHP settings are already configured. But it's necessary to uncomment the “date.timezone” setting and set the right timezone for you.
+Apache configuration file for Zabbix frontend is located in /etc/apache2/conf-enabled/zabbix.conff. Some PHP settings are already configured. But it's necessary to uncomment the “date.timezone” setting and set the right timezone for you.
 
     php_value max_execution_time 300    
     php_value memory_limit 128M
@@ -134,3 +134,5 @@ for first login you can login to web with:
 
     Default Username is Admin
     Default Password is zabbix
+
+
