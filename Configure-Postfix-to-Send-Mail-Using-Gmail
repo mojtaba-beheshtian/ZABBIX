@@ -1,0 +1,118 @@
+####################################################
+Configure Postfix to Send Mail Using Gmail 
+####################################################
+
+####################################################
+Before You BeginPermalink
+####################################################
+1-Complete our Getting Started and Securing Your Server guides and ensure that the Linode’s hostname is set.
+
+2-Update your system:
+
+    sudo apt-get update && sudo apt-get upgrade
+
+3-Use your web browser to confirm your email login credentials by logging in to Gmail.
+
+####################################################
+Install PostfixPermalink
+####################################################
+In this section, you will install Postfix as well as libsasl2, a package which helps manage the Simple Authentication and Security Layer (SASL).
+
+1-Install Postfix and the libsasl2-modules package:
+
+    #sudo apt-get install libsasl2-modules postfix
+
+2-During the Postfix installation, a prompt will appear asking for your General type of mail configuration. Select Internet Site:
+
+3-Enter the fully qualified name of your domain. In this example, fqdn.example.com:
+
+4-Once the installation is complete, confirm that the myhostname parameter is configured with your server’s FQDN:
+
+    nano /etc/postfix/main.cf
+    myhostname = fqdn.example.com
+
+####################################################
+Generate an App Password for PostfixPermalink
+####################################################
+When Two-Factor Authentication (2FA) is enabled, Gmail is preconfigured to refuse connections from applications like Postfix that don’t provide the second step of authentication. While this is an important security measure that is designed to restrict unauthorized users from accessing your account, it hinders sending mail through some SMTP clients as you’re doing here. Follow these steps to configure Gmail to create a Postfix-specific password:
+
+1-Log in to your email, then click the following link: https://myaccount.google.com/security 
+Scroll down to “Password & sign-in method” and click 2-Step Verification. You may be asked for your password and a verification code before continuing. Ensure that 2-Step Verification is enabled.
+
+2-Click the following link to https://security.google.com/settings/security/apppasswords for Postfix:
+
+3-Click Select app and choose Other (custom name) from the dropdown. Enter “Postfix” and click Generate.
+
+4-The newly generated password will appear. Write it down or save it somewhere secure that you’ll be able to find easily in the next steps, then click Done:
+
+####################################################
+Add Gmail Username and Password to Postfix
+####################################################
+Usernames and passwords are stored in sasl_passwd in the /etc/postfix/sasl/ directory. In this section, you’ll add your email login credentials to this file and to Postfix.
+
+1-Open or create the /etc/postfix/sasl/sasl_passwd file and add the SMTP Host, username, and password information:
+
+    nano /etc/postfix/sasl/sasl\\_passwd
+    [smtp.gmail.com]:587 username@gmail.com:password #the password of gmail account generated
+
+2-Create the hash db file for Postfix by running the postmap command:
+    
+    sudo postmap /etc/postfix/sasl/sasl_passwd
+
+If all went well, you should have a new file named sasl_passwd.db in the /etc/postfix/sasl/ directory.
+
+################################################################
+Secure Your Postfix Hash Database and Email Password Files 
+################################################################
+The /etc/postfix/sasl/sasl_passwd and the /etc/postfix/sasl/sasl_passwd.db files created in the previous steps contain your SMTP credentials in plain text.
+
+To restrict access to these files, change their permissions so that only the root user can read from or write to the file. Run the following commands to change the ownership to root and update the permissions for the two files:
+
+    sudo chown root:root /etc/postfix/sasl/sasl_passwd /etc/postfix/sasl/sasl_passwd.db
+    sudo chmod 0600 /etc/postfix/sasl/sasl_passwd /etc/postfix/sasl/sasl_passwd.db
+
+####################################################
+Configure the Postfix Relay Server
+####################################################
+In this section, you will configure the /etc/postfix/main.cf file to use Gmail’s SMTP server.
+
+1-Find and modify relayhost in /etc/postfix/main.cf to match the following example:
+
+    nano /etc/postfix/main.cf
+    relayhost = [smtp.gmail.com]:587
+
+2-At the end of the file, add the following parameters to enable authentication:
+
+    nano /etc/postfix/main.cf
+    # Enable SASL authentication
+    smtp_sasl_auth_enable = yes
+    # Disallow methods that allow anonymous authentication
+    smtp_sasl_security_options = noanonymous
+    # Location of sasl_passwd
+    smtp_sasl_password_maps = hash:/etc/postfix/sasl/sasl_passwd
+    # Enable STARTTLS encryption
+    smtp_tls_security_level = encrypt
+    # Location of CA certificates
+    smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+
+3-Save your changes and close the file.
+
+4-Restart Postfix:
+
+    sudo systemctl restart postfix
+
+####################################################
+Troubleshooting - Enable “Less secure apps” access
+####################################################
+In some cases, Gmail might still block connections from what it calls “Less secure apps.” To enable access:
+
+1-Enable “Less secure apps” access : https://www.google.com/settings/security/lesssecureapps
+
+Select Turn on. A yellow “Updated” notice will appear at the top of the browser window and Gmail will automatically send a confirmation email.
+
+Test Postfix as shown in the following section. If your test emails don’t appear after a few minutes, https://accounts.google.com/DisplayUnlockCaptcha and click Continue.
+
+####################################################
+Test Postfix
+####################################################
+    echo "hi" | mail -s "subject" username@gmail.com
