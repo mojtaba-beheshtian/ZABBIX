@@ -2,7 +2,7 @@ how to run Zabbix server with MySQL database, Zabbix web interface based on the 
 
 1. Create network dedicated for Zabbix component containers:
 
-# docker network create --subnet 172.20.0.0/16 --ip-range 172.20.240.0/20 zabbix-net
+# docker network create --subnet 172.100.0.0/16 --ip-range 172.100.0.0/16 zabbix-net
 
 2. Create new Volume:
 
@@ -13,8 +13,8 @@ how to run Zabbix server with MySQL database, Zabbix web interface based on the 
 # docker run --name mysql-server -t \
       -e MYSQL_DATABASE="zabbix" \
       -e MYSQL_USER="zabbix" \
-      -e MYSQL_PASSWORD="zabbix_pwd" \
-      -e MYSQL_ROOT_PASSWORD="root_pwd" \
+      -e MYSQL_PASSWORD="zabbixpassword" \
+      -e MYSQL_ROOT_PASSWORD="rootpassword" \
       --network=zabbix-net \
       --restart unless-stopped \
       -v db:/var/lib/mysql \
@@ -35,8 +35,8 @@ how to run Zabbix server with MySQL database, Zabbix web interface based on the 
       -e DB_SERVER_HOST="mysql-server" \
       -e MYSQL_DATABASE="zabbix" \
       -e MYSQL_USER="zabbix" \
-      -e MYSQL_PASSWORD="zabbix_pwd" \
-      -e MYSQL_ROOT_PASSWORD="root_pwd" \
+      -e MYSQL_PASSWORD="zabbixpassword" \
+      -e MYSQL_ROOT_PASSWORD="rootpassword" \
       -e ZBX_JAVAGATEWAY="zabbix-java-gateway" \
       --network=zabbix-net \
       -p 10051:10051 \
@@ -52,8 +52,8 @@ Zabbix server instance exposes 10051/TCP port (Zabbix trapper) to host machine.
       -e DB_SERVER_HOST="mysql-server" \
       -e MYSQL_DATABASE="zabbix" \
       -e MYSQL_USER="zabbix" \
-      -e MYSQL_PASSWORD="zabbix_pwd" \
-      -e MYSQL_ROOT_PASSWORD="root_pwd" \
+      -e MYSQL_PASSWORD="zabbixpassword" \
+      -e MYSQL_ROOT_PASSWORD="rootpassword" \
       --network=zabbix-net \
       -p 80:8080 \
       --restart unless-stopped \
